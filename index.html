@@ -1,0 +1,123 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Puzzle Game</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        img {
+            width: 125px;
+            height: 70px;
+            margin-top: -5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="panel" style="max-width: 508px;"></div>
+    
+<script>
+   
+    showImage();
+        var imgIndexes = 16;
+        var times = 0;
+        var interval;
+   
+    // Create and show image
+    function showImage() {
+        
+        var panel = document.getElementById("panel");
+        for(var i = 0; i < 16; i++) {
+            var img = document.createElement("img");
+            img.src = i.toString() + ".png";
+            img.id = "drag" + i.toString();
+            img.setAttribute("draggable", true);
+            img.ondragstart = function() {
+                drag(event);
+            };
+            img.ondrop = function() {
+                drop(event);
+            };
+            img.ondragover = function(){
+                allowDrop(event);
+            };
+            panel.appendChild(img);
+        }
+        
+        setTimeout(function() {
+            interval = setInterval(function() {
+                shuffle();
+            }, 500);
+        }, 5000);
+        
+        
+    }
+    
+    function shuffle() {
+        
+        var children = document.getElementById("panel").children;        
+        for(var i = 0; i < children.length; i++) {
+            children[i].style.border = "1px solid black";
+        }
+        
+        var div1 = Math.floor(Math.random() * 16);
+        var div2 = Math.floor(Math.random() * 16);
+        var img1 = document.getElementById("drag" + div1);
+        var img2 = document.getElementById("drag" + div2);
+        var tempSrc1 = img1.src;
+        img1.src = img2.src;
+        img2.src = tempSrc1;
+        times++;
+        if(times > 7) {
+            clearInterval(interval);
+        }                
+              
+    }
+    
+    function allowDrop(ev) {
+        ev.preventDefault();
+    }
+
+    function drag(ev) {
+        // get the id from the image dragged
+        ev.dataTransfer.setData("text", ev.target.id);
+    }
+
+    function drop(ev) {
+        
+        ev.preventDefault();
+        var hits = 0;
+        
+        var idDragged = ev.dataTransfer.getData("text");
+        var draggedSrc = document.getElementById(idDragged).src;
+        // before change, get the src from img
+        var src = ev.target.src;
+        ev.target.src = draggedSrc;        
+        var el = document.getElementById(ev.dataTransfer.getData("text"));
+        el.src = src;        
+        // see if has a winner
+        var children = document.getElementById("panel").children;        
+        for(var i = 0; i < children.length; i++) {
+            var child = children[i];            
+            var srcToId = child.src.replace(/^.*[\\\/]/, '').replace('.png', '');
+            if(parseInt(i) === parseInt(srcToId)) {
+                hits++;
+            }            
+        }
+        if(hits === 16) {            
+            var d = document.getElementById("panel");
+            var children = document.getElementById("panel").children;
+            for(var i = 0; i < children.length; i++) {
+                children[i].style.border = "none";
+                children[i].setAttribute("draggable", false);
+            }
+            d.style.pointerEvents = "none";
+        }        
+        
+    }
+
+</script>
+    
+</body>
+
+</html>
